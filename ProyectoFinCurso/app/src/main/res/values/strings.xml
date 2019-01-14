@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">fitEgibide</string>
+    <string name="titulo_aplicacion">Egibide.fit</string>
+    <string name="texto_pasos">Numero de pasos</string>
+    <string name="cifra_pasos">0</string>
+    <string name="posicion_ranquin">Posicion</string>
+    <string name="numero_posicion">0/0</string>
+    <string name="boton_actualizar">Actualizar</string>
+</resources>

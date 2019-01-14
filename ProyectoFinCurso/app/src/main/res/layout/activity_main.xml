@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/grisclaro"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/tituloapp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:text="@string/titulo_aplicacion"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="162dp" />
+
+    <TextView
+        android:id="@+id/pasos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="159dp"
+        android:layout_toStartOf="@+id/tituloapp"
+        android:text="@string/texto_pasos"
+        android:textColor="#000000"
+        android:textSize="18dp" />
+
+    <TextView
+        android:id="@+id/cifra_pasos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#000000"
+        android:textSize="18dp"
+        android:layout_alignBottom="@+id/pasos"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="37dp"
+        android:text="@string/cifra_pasos" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#000000"
+        android:textSize="18dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/pasos"
+        android:layout_marginTop="221dp"
+        android:text="@string/posicion_ranquin" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#000000"
+        android:textSize="18dp"
+        android:layout_alignEnd="@+id/cifra_pasos"
+        android:layout_alignTop="@+id/textView4"
+        android:text="@string/numero_posicion" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="121dp"
+        android:layout_height="44dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="135dp"
+        android:background="@android:color/transparent"
+        android:text="@string/boton_actualizar"
+        android:textColor="#FE642E"
+        android:textSize="18dp" />
+
+</RelativeLayout>
