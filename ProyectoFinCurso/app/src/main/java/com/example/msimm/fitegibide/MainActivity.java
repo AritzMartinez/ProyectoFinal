@@ -3,8 +3,10 @@ package com.example.msimm.fitegibide;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.renderscript.Element;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
     private boolean authInProgress = false;
     private GoogleApiClient mApiClient;
     private static final int RC_SIGN_IN = 9001;
-    private String documentID = "";
+    private String documentID = "null";
     TextView cifraPasos;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     Map<String, Object> pasos = new HashMap<>();
@@ -168,13 +170,19 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
 
                     //DocumentReference dr = db.collection("pasos").document(documentID);
                     DocumentReference dr = null;
-                    if (dr == null){
+
+                    if ("null".equals(documentID)){
                         db.collection("pasos")
                                 .add(pasos)
                                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                     @Override
                                     public void onSuccess(DocumentReference documentReference) {
                                         Log.d(LOG_TAG_FB, "DocumentSnapshot added with ID: " + documentReference.getId());
+                                        SharedPreferences myPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                                        SharedPreferences.Editor myEditor = myPreferences.edit();
+                                        myEditor.putString("documentID", documentReference.getId());
+                                        myEditor.commit();
+                                        documentID = documentReference.getId();
                                     }
                                 })
                                 .addOnFailureListener(new OnFailureListener() {
@@ -211,6 +219,12 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
     protected void onStart() {
         super.onStart();
         mApiClient.connect();
+
+        //leer documetID guardado
+        SharedPreferences myPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+
+        documentID  = myPreferences.getString("documentID", "null");
+
 
     }
 
