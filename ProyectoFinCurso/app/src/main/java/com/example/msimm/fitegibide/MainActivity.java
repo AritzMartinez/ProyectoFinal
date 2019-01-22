@@ -1,13 +1,10 @@
 package com.example.msimm.fitegibide;
 
-import android.app.Activity;
+
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.renderscript.Element;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,30 +12,21 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.Fitness;
-import com.google.android.gms.fitness.FitnessActivities;
-import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataPoint;
-import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
-import com.google.android.gms.fitness.data.Session;
 import com.google.android.gms.fitness.data.Value;
-import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.request.DataSourcesRequest;
 import com.google.android.gms.fitness.request.OnDataPointListener;
 import com.google.android.gms.fitness.request.SensorRequest;
 import com.google.android.gms.fitness.request.SessionInsertRequest;
-import com.google.android.gms.fitness.result.DataReadResponse;
 import com.google.android.gms.fitness.result.DataSourcesResult;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -46,19 +34,20 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.Calendar;
-import java.util.Date;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import io.opencensus.common.Scope;
 
 public class MainActivity extends AppCompatActivity implements OnDataPointListener,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener {
 
     public static final String LOG_TAG = "BasicHistoryApi";
     public static final String LOG_TAG_FB = "Firebase";
+    public static final String LOG_TAG_CONSULTA = "Consulta";
+    public static final String LOG_TAG_CONTADOR = "Contador";
     int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 0533;
     private final String SESSION_NAME = "LogRunActivity";
     SessionInsertRequest insertRequest;
@@ -70,7 +59,11 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
     private GoogleApiClient mApiClient;
     private static final int RC_SIGN_IN = 9001;
     private String documentID = "null";
+    private DocumentReference dr = null;
+    int numUsuarios;
+    int pos;
     TextView cifraPasos;
+    TextView cifraRanquing;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     Map<String, Object> pasos = new HashMap<>();
 
@@ -155,21 +148,21 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
 
     @Override
     public void onDataPoint(DataPoint dataPoint) {
-        for( final Field field : dataPoint.getDataType().getFields() ) {
+         final Field field = dataPoint.getDataType().getFields().get(0);
             final Value value = dataPoint.getValue( field );
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     Toast.makeText(getApplicationContext(), "Field: " + field.getName() + " Value: " + value, Toast.LENGTH_SHORT).show();
                     cifraPasos =  findViewById(R.id.cifra_pasos);
-                    cifraPasos.setText(""+value);
+                    cifraPasos.setText(String.valueOf(value));
 
                     //Firebase
                     Map<String, Object> pasos = new HashMap<>();
-                    pasos.put("pasos", ""+value);
+                    pasos.put("pasos", value.asInt());
 
                     //DocumentReference dr = db.collection("pasos").document(documentID);
-                    DocumentReference dr = null;
+                    dr = null;
 
                     if ("null".equals(documentID)){
                         db.collection("pasos")
@@ -210,9 +203,37 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
                                 });
                     }
 
+                    db.collection("pasos")
+                            .orderBy("pasos")
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        numUsuarios = task.getResult().size();
+                                        pos = 0;
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                            Log.d(LOG_TAG_CONSULTA, "ID: " + document.getId());
+                                            if (documentID.equals(document.getId())) {
+                                                break;
+                                            }
+                                            pos++;
+                                        }
+                                        cifraRanquing = findViewById(R.id.cifra_ranquing);
+                                        cifraRanquing.setText(numUsuarios-pos + "/" + numUsuarios);
+
+                                    } else {
+                                        Log.d(LOG_TAG_CONSULTA, "Error getting documents: ", task.getException());
+                                    }
+                                }
+                            });
+
                 }
+
             });
-        }
+
+
+
     }
 
     @Override
@@ -224,7 +245,6 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
         SharedPreferences myPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 
         documentID  = myPreferences.getString("documentID", "null");
-
 
     }
 
@@ -266,6 +286,5 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
         super.onSaveInstanceState(outState);
         outState.putBoolean(AUTH_PENDING, authInProgress);
     }
-
 
 }
