@@ -69,7 +69,7 @@
         android:text="@string/numero_posicion" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/bt_actualizar"
         android:layout_width="121dp"
         android:layout_height="44dp"
         android:layout_alignParentBottom="true"

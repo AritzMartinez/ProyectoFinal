@@ -9,6 +9,8 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
     int pos;
     TextView cifraPasos;
     TextView cifraRanquing;
+    Button actualizar;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     Map<String, Object> pasos = new HashMap<>();
 
@@ -78,10 +81,18 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
 
         mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Fitness.SENSORS_API)
-                .addScope(Fitness.SCOPE_ACTIVITY_READ_WRITE) //   new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
+                .addScope(Fitness.SCOPE_ACTIVITY_READ_WRITE) //new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+        //Actualizar el ranquin mendiante el boton "Actualizar"
+        actualizar =  findViewById(R.id.bt_actualizar);
+        actualizar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                refrescarRanking();
+            }
+        });
 
     }
 
@@ -153,17 +164,20 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(getApplicationContext(), "Field: " + field.getName() + " Value: " + value, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), "Field: " + field.getName() + " Value: " + value, Toast.LENGTH_SHORT).show();
+                    //Obtener los pasos y guardarlo en el texrView
                     cifraPasos =  findViewById(R.id.cifra_pasos);
                     cifraPasos.setText(String.valueOf(value));
 
                     //Firebase
+                    //Guardar el valor de value en firebase
                     Map<String, Object> pasos = new HashMap<>();
                     pasos.put("pasos", value.asInt());
 
                     //DocumentReference dr = db.collection("pasos").document(documentID);
                     dr = null;
-
+                    //Comprobar cada vez que se concecte un usuario a la aplicacion
+                    //Si el usuario no se ha conectado nunca se le genera un ID nuevo
                     if ("null".equals(documentID)){
                         db.collection("pasos")
                                 .add(pasos)
@@ -186,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
                                 });
 
                     }else {
-
+                        //sino se reutiliza ese ID
                         db.collection("pasos").document(documentID)
                                 .set(pasos)
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -202,7 +216,8 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
                                     }
                                 });
                     }
-
+                    //Devuelve el numero de usuarios conecatado ordenados de menos a mayor
+                    //Actualiza el ranking siempre y cuando se este utilizando la aplicacion
                     db.collection("pasos")
                             .orderBy("pasos")
                             .get()
@@ -234,6 +249,34 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
 
 
 
+    }
+    //Funcion para regrescar el ranquin Si la aplicacion esta sin utilizarse
+    public void refrescarRanking(){
+
+        db.collection("pasos")
+                .orderBy("pasos")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            numUsuarios = task.getResult().size();
+                            pos = 0;
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(LOG_TAG_CONSULTA, "ID: " + document.getId());
+                                if (documentID.equals(document.getId())) {
+                                    break;
+                                }
+                                pos++;
+                            }
+                            cifraRanquing = findViewById(R.id.cifra_ranquing);
+                            cifraRanquing.setText(numUsuarios-pos + "/" + numUsuarios);
+
+                        } else {
+                            Log.d(LOG_TAG_CONSULTA, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
     }
 
     @Override
