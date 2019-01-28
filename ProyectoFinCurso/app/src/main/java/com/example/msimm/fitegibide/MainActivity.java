@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
             @Override
             public void onClick(View view) {
                 refrescarRanking();
-                Toast mgActualizacion = Toast.makeText(getApplicationContext(),"La clasificacion a sido actualizada",Toast.LENGTH_SHORT);
+                Toast mgActualizacion = Toast.makeText(getApplicationContext(),"La clasificación ha sido actualizada",Toast.LENGTH_SHORT);
                 mgActualizacion.show();
             }
         });
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
                     //Devuelve el numero de usuarios conecatado ordenados de menos a mayor
                     //Actualiza el ranking siempre y cuando se este utilizando la aplicacion
                     db.collection("pasos")
-                            .orderBy("pasos")
+                            .orderBy("pasos", Query.Direction.DESCENDING)
                             .get()
                             .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                 @Override
@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
                                             pos++;
                                         }
                                         cifraRanquing = findViewById(R.id.cifra_ranquing);
-                                        cifraRanquing.setText(numUsuarios-pos + "/" + numUsuarios);
+                                        cifraRanquing.setText(pos + "/" + numUsuarios);
 
                                     } else {
                                         Log.d(LOG_TAG_CONSULTA, "Error getting documents: ", task.getException());
