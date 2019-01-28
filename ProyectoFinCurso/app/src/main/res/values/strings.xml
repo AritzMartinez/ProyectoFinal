@@ -5,5 +5,5 @@
     <string name="cifra_pasos">0</string>
     <string name="posicion_ranquin">Posicion</string>
     <string name="numero_posicion">0/0</string>
-    <string name="boton_actualizar">Actualizar</string>
+    <string name="boton_actualizar">Actualizar clasificación</string>
 </resources>
