@@ -4,6 +4,7 @@ package com.example.msimm.fitegibide;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -86,7 +87,9 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
                 .addOnConnectionFailedListener(this)
                 .build();
         //Actualizar el ranquin mendiante el boton "Actualizar"
+        //Actualiza el ranquin en cuando la aplicacion no se esta usando
         actualizar =  findViewById(R.id.bt_actualizar);
+        actualizar.setTypeface(actualizar.getTypeface(), Typeface.BOLD);
         actualizar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -228,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements OnDataPointListen
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                     if (task.isSuccessful()) {
                                         numUsuarios = task.getResult().size();
-                                        pos = 0;
+                                        pos = 1;
                                         for (QueryDocumentSnapshot document : task.getResult()) {
                                             Log.d(LOG_TAG_CONSULTA, "ID: " + document.getId());
                                             if (documentID.equals(document.getId())) {
